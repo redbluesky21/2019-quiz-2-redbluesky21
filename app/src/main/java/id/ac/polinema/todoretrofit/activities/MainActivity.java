@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -44,18 +45,19 @@ public class MainActivity extends AppCompatActivity implements TodoAdapter.OnTod
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-		Toolbar toolbar = findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
+        Toolbar toolbar;
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-		FloatingActionButton fab = findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, SaveTodoActivity.class);
                 intent.putExtra(Constant.KEY_REQUEST_CODE, Constant.ADD_TODO);
                 startActivityForResult(intent, Constant.ADD_TODO);
-			}
-		});
+            }
+        });
         session = Application.provideSession();
         if (!session.isLogin()) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -109,8 +111,18 @@ public class MainActivity extends AppCompatActivity implements TodoAdapter.OnTod
         if (id == R.id.action_settings) {
             return true;
         }
+        else if (id == R.id.logout) {
+            onLogout();
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onLogout (){
+        startActivity(new Intent(this,LoginActivity.class));
+        finish();
     }
 
     @Override
@@ -128,4 +140,42 @@ public class MainActivity extends AppCompatActivity implements TodoAdapter.OnTod
             loadTodos();
         }
     }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case 121:
+                removeTodo(item.getGroupId());
+//                Toast.makeText(this,"Deleted",Toast.LENGTH_SHORT).show();
+                return true;
+        }
+
+
+        return super.onContextItemSelected(item);
+    }
+
+    public void removeTodo(int position){
+        List<Todo> items = adapter.getItems();
+        Todo item = items.get(position);
+        Call<Envelope<Todo>> deleteTodo = service.deleteTodo(Integer.toString(item.getId()));
+        deleteTodo.enqueue(new Callback<Envelope<Todo>>() {
+            @Override
+            public void onResponse(Call<Envelope<Todo>> call, Response<Envelope<Todo>> response) {
+                if (response.code() == 200) {
+                    Toast.makeText(MainActivity.this,"Todo Deleted",Toast.LENGTH_SHORT).show();
+                    loadTodos();
+                }else{
+                    Toast.makeText(MainActivity.this,response.toString(), Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Envelope<Todo>> call, Throwable t) {
+
+            }
+        });
+
+    }
+
 }
