@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements TodoAdapter.OnTod
         if (id == R.id.action_settings) {
             return true;
         }
-        else if (id == R.id.logout) {
+        else if (id == R.id.action_logout) {
             onLogout();
             return true;
         }

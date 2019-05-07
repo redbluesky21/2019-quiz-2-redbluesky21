@@ -12,8 +12,8 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-
 public interface TodoService {
+
 
 	@GET("/v1/todos")
 	Call<Envelope<List<Todo>>> getTodos(@Query("q") String q, @Query("page") int page, @Query("pageSize") int pageSize);
